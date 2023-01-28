@@ -13,6 +13,7 @@
     Creation:       2023-01-28
     Hosted at:      https://cloudflared.app/update.ps1
 #>
+
 # Find executables (configure as needed)
 param(
     # Name of Cloudflared service
@@ -34,6 +35,17 @@ param(
     # Run cloudflared update for us?
     [switch]$cloudflared_run_update = $true
 )
+
+
+# Enforce Administrator rights
+
+#Requires -RunAsAdministrator
+
+if (-NOT ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
+    Write-Host ("Administrative rights are required for this script to run properly.")
+    Start-Sleep 5
+    Exit
+}
 
 
 # Test for files (Is it found, or does it even need updated?)

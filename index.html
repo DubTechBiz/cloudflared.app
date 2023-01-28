@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Cloudflared updater</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.3/css/bootstrap.min.css" integrity="sha512-SbiR/eusphKoMVVXysTKG/7VseWii+Y3FdHrt0EpKgpToZeemhqHeZeLWLhJutz/2ut2Vw1uQEj2MbRF+TVBUA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+	<link rel="stylesheet" href="style.css" />
+</head>
+<body class="d-flex flex-column h-100">
+	<!-- <header></header> -->
+	<main role="main" class="container mb-4">
+		<div class="container">
+			<div class="row">
+				<div class="span-2">
+				</div>
+				<div class="span-10">
+					<section id="sec-ins-win">
+						<div class="page-header">
+							<h1>Windows</h1>
+						</div>
+						<ul>
+							<li>On Windows, open PowerShell as an Administrator</li>
+							<li>
+								Run the following command:
+								<code id="command-windows" data-copy="true">irm https://cloudflared-app.pages.dev/update.ps1 | iex</code>
+							</li>
+							<li>The script referenced should download and execute in PowerShell.</li>
+						</ul>
+					</section>
+					<section id="sec-faq">
+						<h3 class="text-center mb-4 pb-2 text-primary fw-bold">FAQ</h3>
+						<p class="text-center mb-5">
+							Find some answers to some questions below
+						</p>
+
+						<div class="row">
+							<div class="col-md-6 col-lg-4 mb-4">
+								<h6 class="mb-3 text-primary"><i class="fa-brands fa-cloudflare cloudflare-orange pe-2"></i> Is this legit/official?</h6>
+								<p>
+									<span class="text-danger">This service is <b><u>not</u></b> created or maintained by Cloudflare.</span> However, this is hosted by <a href="https://pages.cloudflare.com/">Cloudflare Pages</a> and could be audited/pulled by Cloudflare at any point if they choose to do so. We currently do not host any of the cloudflared binaries, nor will we use the scripts for any other purpose. If you still want to play it safe, you are free to download or self-host the script on your own page and utilize the domain you control rather than ours.
+								</p>
+							</div>
+							<div class="col-md-6 col-lg-4 mb-4">
+								<h6 class="mb-3 text-primary"><i class="fa fa-download pe-2"></i> Can I save the script and run locally?</h6>
+								<p>
+									Yes, and no. While the script itself has no dependencies on this site and is only here for hosting, <a href="https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_execution_policies">the default execution policy for Windows client computers permits individual commands, but does not allow scripts</a>. The command above is downloading the script using the command <code data-copy="false">irm</code> (<a href="https://learn.microsoft.com/en-us/powershell/module/Microsoft.PowerShell.Utility/Invoke-RestMethod">Invoke-RestMethod</a>), then executing the contents by piping it to the command <code data-copy="false">iex</code> (<a href="https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/invoke-expression">Invoke-Expression</a>). An alternative way to bypass the restriction is saving the script locally and invoking <code data-copy="true">Get-Content -Raw .\update.ps1 | iex</code> in an elevated PowerShell window (you'll need to move to the same directory as the script).
+								</p>
+							</div>
+							<div class="col-md-6 col-lg-4 mb-4">
+								<h6 class="mb-3 text-primary"><i class="fa fa-question pe-2"></i> What is this doing exactly?</h6>
+								<p>
+									In short, this script is:
+									<ol>
+										<li>Checking if cloudflared is on your PC</li>
+										<li>Running <code data-copy="true">cloudflared --update</code> to allow the application to check for updates natively</li>
+										<li>Seeing if an update was downloaded</li>
+										<li>Applying the update to use</li>
+									</ol>
+								</p>
+							</div>
+							<div class="col-md-6 col-lg-4 mb-4">
+								<h6 class="mb-3 text-primary"><i class="fa fa-question pe-2"></i> Why do I need to do it this way?</h6>
+								<p>
+									Normally, running <code data-copy="true">cloudflared --update</code> downloads the latest binary to <code data-copy="false">C:\path\to\cloudflared.exe.new</code> but does not actually replace the binary. Running this will also replace the binary, even if it's in use (it will restart the tunnel to do so).
+								</p>
+							</div>
+							<div class="col-md-6 col-lg-4 mb-4">
+								<h6 class="mb-3 text-primary"><i class="fa fa-gears pe-2"></i> What if I'm running this as a service?</h6>
+								<p>
+									After checking for and fetching the update, the script will then check to see if the service is already running. If it is, the service will be stopped so that the binary can be replaced. After replacing, the service will start again if it was previously running.
+								</p>
+							</div>
+							<div class="col-md-6 col-lg-4 mb-4">
+								<h6 class="mb-3 text-primary"><i class="fa fa-clock pe-2"></i> Can I automate this to run routinely?</h6>
+								<p>
+									At this moment, we do not have a guide for automating updates. This can be done via Task Scheduler, and will likely be the method chosen in the future.
+								</p>
+							</div>
+							<div class="col-md-6 col-lg-4 mb-4">
+								<h6 class="mb-3 text-primary"><i class="fa-brands fa-linux pe-2"></i> What about Linux or Mac?</h6>
+								<p>
+									We do not have any plans for adding any scripts for Linux or Mac. Linux can be maintained much more easily via repo updating. Considering the various distros, we will not be providing guidance on this at this time.
+								</p>
+							</div>
+							<div class="col-md-6 col-lg-4 mb-4">
+								<h6 class="mb-3 text-primary"><i class="fa fa-question pe-2"></i> I need help with something else.</h6>
+								<p>
+									Unfortunately, there are no official support channels for this at this time. You may feel free to reach out to me via Discord in the Cloudflare community server, however do not expect others to have answers.
+								</p>
+							</div>
+							<div class="col-md-6 col-lg-4 mb-4">
+								<h6 class="mb-3 text-primary"><i class="fa fa-bug pe-2"></i> I would like to contribute to this!</h6>
+								<p>
+									At this time this is not open for community contributions, but this may change.
+								</p>
+							</div>
+						</div>
+					</section>
+				</div>
+			</div>
+		</div>
+	</main>
+	<footer class="bg-light text-center text-lg-start fixed-bottom">
+		<div class="container text-center p-3">
+			Created by: Dubz | <i class="fa-brands fa-discord discord-blurple pe-1"></i><a href="https://discord.gg/cloudflaredev" class="discord-blurple">Join the Cloudflare Discord</a>
+		</div>
+	</footer>
+</body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.3/jquery.min.js" integrity="sha512-STof4xm1wgkfm7heWqFJVn58Hm3EtS31XFaagaa8VMReCXAkQnJZ+jEy8PCC/iT18dFy95WcExNHFTqLyp72eQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.3/js/bootstrap.bundle.min.js" integrity="sha512-i9cEfJwUwViEPFKdC1enz4ZRGBj8YQo6QByFTF92YXHi7waCqyexvRD75S5NVTsSiTv7rKWqG9Y5eFxmRsOn0A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/js/all.min.js" integrity="sha512-rpLlll167T5LJHwp0waJCh3ZRf7pO6IT1+LZOhAyP6phAirwchClbTZV3iqL3BMrVxIYRbzGTpli4rfxsCK6Vw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="script.js"></script>
+</html>

@@ -1,0 +1,19 @@
+code {
+	background-color:#eee;
+	border:1px solid #555;
+	border-radius: 4px;
+	padding: 0.2em;
+	display: inline-block;
+}
+code[data-copy=false] {
+	color: #444;
+}
+.cloudflare-orange {
+	color:#f6821f;
+}
+.cloudflare-gray {
+	color:#d9d9d9;
+}
+.discord-blurple {
+	color:#5865f2;
+}

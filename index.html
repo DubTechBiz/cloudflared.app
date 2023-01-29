@@ -39,13 +39,13 @@
 							<div class="col-md-6 col-lg-4 mb-4">
 								<h6 class="mb-3 text-primary"><i class="fa-brands fa-cloudflare cloudflare-orange pe-2"></i> Is this legit/official?</h6>
 								<p>
-									<span class="text-danger">This service is <b><u>not</u></b> created or maintained by Cloudflare.</span> However, this is hosted by <a href="https://pages.cloudflare.com/">Cloudflare Pages</a> and could be audited/pulled by Cloudflare at any point if they choose to do so. We currently do not host any of the cloudflared binaries, nor will we use the scripts for any other purpose. If you still want to play it safe, you are free to download or self-host the script on your own page and utilize the domain you control rather than ours.
+									<span class="text-danger">This service is <b><u>not</u></b> created or maintained by Cloudflare.</span> However, this is hosted by <a href="https://pages.cloudflare.com/" target="_blank">Cloudflare Pages</a> and could be audited/pulled by Cloudflare at any point if they choose to do so. We currently do not host any of the cloudflared binaries, nor will we use the scripts for any other purpose. If you still want to play it safe, you are free to download or self-host the script on your own page and utilize the domain you control rather than ours.
 								</p>
 							</div>
 							<div class="col-md-6 col-lg-4 mb-4">
 								<h6 class="mb-3 text-primary"><i class="fa fa-download pe-2"></i> Can I save the script and run locally?</h6>
 								<p>
-									Yes, and no. While the script itself has no dependencies on this site and is only here for hosting, <a href="https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_execution_policies">the default execution policy for Windows client computers permits individual commands, but does not allow scripts</a>. The command above is downloading the script using the command <code data-copy="false">irm</code> (<a href="https://learn.microsoft.com/en-us/powershell/module/Microsoft.PowerShell.Utility/Invoke-RestMethod">Invoke-RestMethod</a>), then executing the contents by piping it to the command <code data-copy="false">iex</code> (<a href="https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/invoke-expression">Invoke-Expression</a>). An alternative way to bypass the restriction is saving the script locally and invoking <code data-copy="true">Get-Content -Raw .\update.ps1 | iex</code> in an elevated PowerShell window (you'll need to move to the same directory as the script).
+									Yes, and no. While the script itself has no dependencies on this site and is only here for hosting, <a href="https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_execution_policies" target="_blank">the default execution policy for Windows client computers permits individual commands, but does not allow scripts</a>. The command above is downloading the script using the command <code data-copy="false">irm</code> (<a href="https://learn.microsoft.com/en-us/powershell/module/Microsoft.PowerShell.Utility/Invoke-RestMethod" target="_blank">Invoke-RestMethod</a>), then executing the contents by piping it to the command <code data-copy="false">iex</code> (<a href="https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/invoke-expression" target="_blank">Invoke-Expression</a>). An alternative way to bypass the restriction is saving the script locally and invoking <code data-copy="true">Get-Content -Raw .\update.ps1 | iex</code> in an elevated PowerShell window (you'll need to move to the same directory as the script).
 								</p>
 							</div>
 							<div class="col-md-6 col-lg-4 mb-4">
@@ -104,7 +104,7 @@
 	</main>
 	<footer class="bg-light text-center text-lg-start fixed-bottom">
 		<div class="container text-center p-3">
-			Created by: Dubz | <i class="fa-brands fa-discord discord-blurple pe-1"></i><a href="https://discord.gg/cloudflaredev" class="discord-blurple">Join the Cloudflare Discord</a>
+			Created by: Dubz | <i class="fa-brands fa-discord discord-blurple pe-1"></i><a href="https://discord.gg/cloudflaredev" target="_blank" class="discord-blurple">Join the Cloudflare Discord</a>
 		</div>
 	</footer>
 </body>

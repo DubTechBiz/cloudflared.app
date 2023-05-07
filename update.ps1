@@ -9,8 +9,8 @@
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     Author:         Dubz
     Discord:        Dubz#0001 | https://discord.gg/cloudflaredev
-    Version:        1.0
-    Creation:       2023-01-28
+    Version:        2023.05.07
+    Creation:       2023-05-07
     Hosted at:      https://cloudflared.app/update.ps1
 #>
 
@@ -27,6 +27,9 @@ param(
 
     # Cloudflare seems to default the update path to "*.new"
     [string]$cloudflared_path_new = $cloudflared_path + ".new",
+    # UPDATE: Later versions replace the file and rename the current to "*.old"
+    # This was changed around 2023.5.0
+    [string]$cloudflared_path_old = $cloudflared_path + ".old",
 
     # Commands used by cloudflared
     [string]$cloudflared_command_update = $cloudflared_path + " update",
@@ -48,7 +51,7 @@ if (-NOT ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
 }
 
 
-# Test for files (Is it found, or does it even need updated?)
+# Test for files (Is cloudflared.exe found, or does it even need updated?)
 If (!(Test-Path -LiteralPath $cloudflared_path -PathType Leaf)) {
     Write-Host ($filename + " not found, exiting.")
     Start-Sleep 3
@@ -59,43 +62,78 @@ Write-Host ("Cloudflared found, getting current version:")
 iex $cloudflared_command_version
 Write-Host ("")
 
+# Is the service currently running?
+# Moved here now since the update replaces the file properly but does not restart the service
+# Backwards compatible as the order did not matter initially
+$running = ((Get-Service -Name $service).Status -eq "Running")
+if($running) {
+    Write-Host ("cloudflared service: running")
+}
+Else {
+    Write-Host ("cloudflared service: stopped")
+}
+
 # Run update command
 if ($cloudflared_run_update) {
     iex $cloudflared_command_update
+    # Pause for 2 seconds to allow the update to complete file renames before continuing
+    Start-Sleep 2
 }
 
 # Is there an updated binary?
-If (!(Test-Path -LiteralPath $cloudflared_path_new -PathType Leaf)) {
-    Write-Host ("New binary not found, exiting.")
+If (!(Test-Path -LiteralPath $cloudflared_path_old -PathType Leaf)) {
+    Write-Host ("Old binary not found")
+    If (!(Test-Path -LiteralPath $cloudflared_path_new -PathType Leaf)) {
+        Write-Host ("LEGACY CHECK: New binary not found either, exiting.")
+        Start-Sleep 3
+        Exit
+    }
+    Else {
+        # Legacy update found, continuing...
+
+        # If so, stop it so we can remove the old binary and move the new one to its place
+        if ($running -And !(Test-Path -LiteralPath $cloudflared_path_new -PathType Leaf)) {
+            # Stop the service
+            Stop-Service $service;
+        }
+
+        # Remove
+        rm $cloudflared_path
+
+        # Move/replace
+        mv $cloudflared_path_new $cloudflared_path;
+
+        # Restart the service if it was running previously
+        if ($running) {
+            # Start back up
+            Write-Host ("Starting cloudflared service back up...")
+            Start-Service $service;
+        }
+
+        Write-Host ("LEGACY UPDATE: Cloudflared has been updated!")
+        iex $cloudflared_command_version
+        Start-Sleep 3
+        Exit
+    }
+}
+Else {
+    # Nothing to do as the update does 95% of the work now
+    # Restart the service if it was running previously
+    # For some reason, the native update returns the service state to its polar opposite. We fix that here.
+    if ($running) {
+        # Start back up
+        Write-Host ("Starting cloudflared service back up...")
+        Start-Service $service;
+    }
+    Else {
+        Write-Host ("Service was stopped before, but the update starts it.")
+        Write-Host ("Stopping service to match original state...")
+        Stop-Service $service;
+    }
+
+    Write-Host ("Cloudflared has been updated!")
+    Write-Host ("Please delete the old binary at: " + $cloudflared_path_old)
+    iex $cloudflared_command_version
     Start-Sleep 3
     Exit
 }
-
-
-# Update found, continuing...
-
-# Is the service currently running?
-$running = ((Get-Service -Name $service).Status -eq "Running")
-
-# If so, stop it so we can remove the old binary and move the new one to its place
-if ($running) {
-    # Stop the service
-    Stop-Service $service;
-}
-
-# Remove
-rm $cloudflared_path
-
-# Move
-mv $cloudflared_path_new $cloudflared_path;
-
-# Restart the service if it was running previously
-if ($running) {
-    # Start back up
-    Start-Service $service;
-}
-
-Write-Host ("Cloudflared has been updated!")
-iex $cloudflared_command_version
-Start-Sleep 3
-Exit

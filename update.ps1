@@ -122,13 +122,23 @@ Else {
     # For some reason, the native update returns the service state to its polar opposite. We fix that here.
     if ($running) {
         # Start back up
-        Write-Host ("Starting cloudflared service back up...")
-        Start-Service $service;
+        If((Get-Service -Name $service).Status -eq "Running") {
+            Write-Host ("Service already running!")
+        }
+        Else {
+            Write-Host ("Starting cloudflared service back up...")
+            Start-Service $service;
+        }
     }
     Else {
-        Write-Host ("Service was stopped before, but the update starts it.")
-        Write-Host ("Stopping service to match original state...")
-        Stop-Service $service;
+        If(((Get-Service -Name $service).Status -ne "Running")) {
+            Write-Host ("Service already stopped!")
+        }
+        Else {
+            Write-Host ("Service was stopped before, but the update starts it.")
+            Write-Host ("Stopping service to match original state...")
+            Stop-Service $service;
+        }
     }
 
     Write-Host ("Cloudflared has been updated!")
